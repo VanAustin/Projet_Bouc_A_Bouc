@@ -1,0 +1,157 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ parent() }} - Mes prêts
+{% endblock %}
+
+{% block body %}
+    <h2>Mes prêts</h2>
+
+    <div class="switch-tabs">
+        <ul class="switch-tabs-nav clearfix">
+            <li><a id="local-demandes" href="#demandes">Mes demandes <span id="loan-notifs2" class="tab-span-notif badge badge-danger"></span></a></li>
+            <li><a id="local-prets" href="#prets">Mes prêts</a></li>
+            <li><a id="local-emprunts" href="#emprunts">Mes emprunts</a></li>
+        </ul>
+
+        <div class="switch-tabs-body mb-50">
+
+            <div id="demandes" class="switch-content">
+                <div class="row no-gutters">
+                    <div class="col-lg-6 mb-5">
+                        <h2>Demandes reçues</h2>
+                        {% set count = 0 %}
+                        {% for book in user.collections %}
+                            <ul class="list-group px-3">
+                                {% if not book.borrowed and book.borrowAsk %}
+                                    <li class="list-group-item list-group-item-warning d-flex justify-content-between">
+                                        <span class="align-self-center">
+                                            <a class="book-link" href="{{ path('friend_show', {'id': userRepo.findOneByUsername(book.borrower).getId()}) }}">'{{ userRepo.findOneByUsername(book.borrower).getUsername() }}'</a> souhaite vous emprunter <a class="book-link" href="{{ path('book_view', {'id': book.book.id}) }}">'{{ book.book.title }}'</a>
+                                            <br>
+                                            <span class="align-self-center">Vous pouvez le joindre via {{ userRepo.findOneByUsername(book.borrower).getEmail() }}</span>
+                                        </span>
+                                        <div class="text-center">
+                                            <form class="align-self-center" action="{{ path('loan_handle', {'id': book.id}) }}" method="post">
+                                                <button type="submit" class="btn btn-light" name="accept"><i class="fa fa-check" aria-hidden="true"></i> Accepter</button>
+                                            </form>
+                                            <br>
+                                            <form class="align-self-center" action="{{ path('loan_handle', {'id': book.id}) }}" method="post">
+                                                <button type="submit" class="btn btn-dark" name="refuse"><i class="fa fa-times" aria-hidden="true"></i> Refuser</button>
+                                            </form>
+                                        </div>
+                                    </li>
+                                    {% set count = count + 1 %}
+                                {% endif %}
+                            </ul>
+                        {% endfor %}
+                        {% if count == 0 %}
+                            <ul class="list-group px-3">
+                                <li class="list-group-item list-group-item-secondary">Aucune demande en cours</li>
+                            </ul>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-lg-6 mb-5">
+                        <h2>Demandes envoyées (en attente)</h2>
+                        {% set count = 0 %}
+                        {% for book in myLoans %}
+                            <ul class="list-group px-3">
+                                {% if not book.borrowed and book.borrowAsk %}
+                                    <li class="list-group-item list-group-item-warning d-flex justify-content-between">
+                                        <span class="align-self-center">
+                                            Vous souhaitez emprunter <a class="book-link" href="{{ path('book_view', {'id': book.book.id}) }}">'{{ book.book.title }}'</a> à <a class="book-link" href="{{ path('friend_show', {'id': book.user.id}) }}">'{{ book.user.username }}'</a>
+                                            <br>
+                                            <span class="align-self-center">Vous pouvez le joindre via {{ book.user.email }}</span>
+                                        </span>
+                                    </li>
+                                    {% set count = count + 1 %}
+                                {% endif %}
+                            </ul>
+                        {% endfor %}
+                        {% if count == 0 %}
+                            <ul class="list-group px-3">
+                                <li class="list-group-item list-group-item-secondary">Aucune demande en cours</li>
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div id="prets" class="switch-content">
+                <div class="d-flex flex-wrap justify-content-center">
+                    {% for book in user.collections %}
+                        {% if book.borrowed %}
+                            <div class="mx-2">
+                                <a class="card-link" href="{{ path('book_view', {'id': book.book.id}) }}">
+                                    <div class="card text-center mb-5 px-3 pt-3">
+                                        <img class="card-img-top" src="{{ book.book.picture }}" alt="" style="width: fit-content; margin: auto;">
+                                        <div class="card-body">
+                                            <h4 class="card-title">{{ book.book.title }}</h4>
+                                            <p class="card-text">
+                                                Auteur(s) :
+                                                {% for author in book.book.authors %}
+                                                    {% if not loop.last %}
+                                                        {{ author.authorName }},
+                                                    {% else %}
+                                                        {{ author.authorName }}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </p>
+                                            <hr>
+                                            <p class="card-text">Prêté à : {{ book.borrower }} ({{ userRepo.findOneByUsername(book.borrower).email }})</p>
+                                            <p class="card-text">Le : {{ book.borrowDate|date('d/m/Y') }}</p>
+                                        </div>
+                                        <hr class="m-0">
+                                        <div class="m-2">
+                                            <form class="align-self-center" action="{{ path('loan_handle', {'id': book.id}) }}" method="post">
+                                                <button type="submit" class="btn btn-secondary" name="end"><i class="fa fa-times" aria-hidden="true"></i> Mettre fin au prêt</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div id="emprunts" class="switch-content">
+                <div class="d-flex flex-wrap justify-content-center">
+                    {% for book in myLoans %}
+                        {% if book.borrowed %}
+                            <div class="mx-2">
+                                <a class="card-link" href="{{ path('book_view', {'id': book.book.id}) }}">
+                                    <div class="card text-center mb-5 px-3 pt-3">
+                                        <img class="card-img-top" src="{{ book.book.picture }}" alt="" style="width: fit-content; margin: auto;">
+                                        <div class="card-body">
+                                            <h4 class="card-title">{{ book.book.title }}</h4>
+                                            <p class="card-text">
+                                                Auteur(s) :
+                                                {% for author in book.book.authors %}
+                                                    {% if not loop.last %}
+                                                        {{ author.authorName }},
+                                                    {% else %}
+                                                        {{ author.authorName }}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </p>
+                                            <hr>
+                                            <p class="card-text">Emprunté à : {{ book.user.username }} ({{ book.user.email }})</p>
+                                            <p class="card-text">Le : {{ book.borrowDate|date('d/m/Y') }}</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('public/js/tabs/pret-tabs.js') }}"></script>
+{% endblock %}

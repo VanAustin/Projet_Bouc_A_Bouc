@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ parent() }} - Ma liste de souhaits
+{% endblock %}
+
+{% block body %}
+	<h2>Ma liste de souhaits</h2>
+    <div class="d-flex flex-wrap justify-content-center" style="padding: 0 40px;">
+        {% for book in bookwishes %}
+            <div class="mx-2">
+                <a class="card-link" href="{{ path('book_view', {'id': book.id}) }}">
+                    <div class="card text-center mb-5 px-3 pt-3">
+                        <img class="card-img-top" src="{{ book.picture }}" alt="" style="width: fit-content; margin: auto;">
+                        <div class="card-body">
+                            <h4 class="card-title">{{ book.title }}</h4>
+                            <p class="card-text">
+                                Auteur(s) :
+                                {% for author in book.authors %}
+                                    {% if not loop.last %}
+                                        {{ author.authorName }},
+                                    {% else %}
+                                        {{ author.authorName }}
+                                    {% endif %}
+                                {% endfor %}
+                            </p>
+                        </div>
+                        <hr class="m-0">
+                        <div class="m-2">
+                            <a class="btn btn-secondary" href="{{ path('wish_to_collection', {'id': book.id}) }}"><i class="fa fa-exchange" aria-hidden="true"></i> Passer dans ma collection</a>
+                        </div>
+                        <div class="m-2">
+                            <a class="btn btn-danger" href="{{ path('delete_bookwishes', {'id': book.id}) }}" onclick="return confirm('Supprimer ?')"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</a>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

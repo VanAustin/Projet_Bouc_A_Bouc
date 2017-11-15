@@ -1,0 +1,167 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ parent() }} - Détails d'un ami
+{% endblock %}
+
+{% block body %}
+    <h2>Informations sur {{ friend.username }}</h2>
+    <div class="row">
+        <div class="col-lg-5 col-md-12">
+            <div class="d-flex flex-wrap justify-content-center">
+                <div class="card text-center mb-5 px-3" style="width: 20rem;">
+                    {% if friend.filename is defined and friend.filename != null %}
+                        <img class="card-img-top mx-auto avatar my-2" src="{{ asset('uploads/' ~friend.filename) }}" alt="">
+                    {% else %}
+                        <img class="card-img-top mx-auto avatar my-2" src="{{ asset('public/images/goat.jpg') }}" alt="" class="avatar">
+                    {% endif %}
+                    <div class="card-body">
+                        <h4 class="card-title">{{ friend.username }}</h4>
+                        <p class="card-text">{{ friend.address }}</p>
+                    </div>
+                    <hr class="m-0">
+                    <div class="m-2">
+                        <a class="btn btn-danger" href="{{ path('delete_friend', {'id': friend.id}) }}" onclick="return confirm('Supprimer ?')"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7 col-md-12 mb-5">
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <style>
+        #map
+        {
+          height: 275px;
+          width: 100%;
+        }
+    </style>
+    <p id="lat1" style="display: none;">{{ friend.lat }}</p>
+    <p id="lng1" style="display: none;">{{ friend.lng }}</p>
+    <p id="geoloc-count" style="display: none;">1</p>
+
+    <div class="switch-tabs">
+        <ul class="switch-tabs-nav clearfix">
+            <li><a id="local-collection" href="#collection">Sa collection</a></li>
+            <li><a id="local-souhaits" href="#souhaits">Ses souhaits</a></li>
+            <li><a id="local-prets" href="#prets">Ses livres ouverts au prêt</a></li>
+        </ul>
+
+        <div class="switch-tabs-body mb-50">
+
+            <div id="collection" class="switch-content">
+                <div class="d-flex flex-wrap justify-content-center">
+                    {% for book in friend.collections %}
+                        <div class="mx-2">
+                            <a class="card-link" href="{{ path('book_view', {'id': book.book.id}) }}">
+                                <div class="card text-center mb-5 px-3 pt-3">
+                                    <img class="card-img-top" src="{{ book.book.picture }}" alt="" style="width: fit-content; margin: auto;">
+                                    <div class="card-body">
+                                        <h4 class="card-title">{{ book.book.title }}</h4>
+                                        <p class="card-text">
+                                            Auteur(s) :
+                                            {% for author in book.book.authors %}
+                                                {% if not loop.last %}
+                                                    {{ author.authorName }},
+                                                {% else %}
+                                                    {{ author.authorName }}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div id="souhaits" class="switch-content">
+                <div class="d-flex flex-wrap justify-content-center">
+                    {% for book in friend.bookwishes %}
+                        <div class="mx-2">
+                            <a class="card-link" href="{{ path('book_view', {'id': book.id}) }}">
+                                <div class="card text-center mb-5 px-3 pt-3">
+                                    <img class="card-img-top" src="{{ book.picture }}" alt="" style="width: fit-content; margin: auto;">
+                                    <div class="card-body">
+                                        <h4 class="card-title">{{ book.title }}</h4>
+                                        <p class="card-text">
+                                            Auteur(s) :
+                                            {% for author in book.authors %}
+                                                {% if not loop.last %}
+                                                    {{ author.authorName }},
+                                                {% else %}
+                                                    {{ author.authorName }}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div id="prets" class="switch-content">
+                <div class="d-flex flex-wrap justify-content-center">
+                    {% for book in friend.collections %}
+                        {% if book.loanable %}
+                            <div class="mx-2">
+                                <a class="card-link" href="{{ path('book_view', {'id': book.book.id}) }}">
+                                    <div class="card text-center mb-5 px-3 pt-3">
+                                        <img class="card-img-top" src="{{ book.book.picture }}" alt="" style="width: fit-content; margin: auto;">
+                                        <div class="card-body">
+                                            <h4 class="card-title">{{ book.book.title }}</h4>
+                                            <p class="card-text">
+                                                Auteur(s) :
+                                                {% for author in book.book.authors %}
+                                                    {% if not loop.last %}
+                                                        {{ author.authorName }},
+                                                    {% else %}
+                                                        {{ author.authorName }}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </p>
+                                        </div>
+                                        <hr class="m-0">
+                                        {% if not book.borrowed and not book.borrowAsk %}
+                                            <div class="m-2">
+                                                <form action="{{ path('loan_request', {'id': book.id}) }}" method="POST">
+                                                    <button type="submit" name="loanrequest" class="btn btn-secondary"><i class="fa fa-question" aria-hidden="true"></i> Demande de prêt :)</button>
+                                                </form>
+                                            </div>
+                                        {% elseif book.borrowAsk and book.borrower == app.user.username and not book.borrowed %}
+                                            <div class="m-2">
+                                                <span class="badge badge-warning mb-3"><i class="fa fa-check" aria-hidden="true"></i> Demande déjà envoyée</span>
+                                            </div>
+                                        {% elseif book.borrowAsk and book.borrower != app.user.username and not book.borrowed %}
+                                            <div class="m-2">
+                                                <span class="badge badge-warning mb-3"><i class="fa fa-frown-o" aria-hidden="true"></i> Un autre utilisateur demande déjà ce livre</span>
+                                            </div>
+                                        {% elseif book.borrowed %}
+                                            <div class="m-2">
+                                                <span class="badge badge-warning mb-3"><i class="fa fa-exclamation" aria-hidden="true"></i> Livre prêté</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('public/js/tabs/friend-tabs.js') }}"></script>
+    <script src="{{ asset('public/js/geoloc/geoloc.js') }}"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDrNUg-OB0yrh3jDuC4n7nXBDhDbFkmpvY&callback=initMap"></script>
+{% endblock %}

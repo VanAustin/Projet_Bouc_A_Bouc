@@ -1,0 +1,105 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ parent() }} - Détail d'un livre
+{% endblock %}
+
+{% block body %}
+<div class="container">
+	<div class="">
+		<h2>{{ book.title }}</h2>
+        <div class="d-flex justify-content-center">
+            <img class="card-img-top" src="{{ book.picture }}" alt="" style="width: fit-content">
+        </div>
+		<p class="card-text text-center mt-3">
+			Auteur(s) :
+			{% for author in book.authors %}
+		        {% if not loop.last %}
+		            {{ author.authorName }},
+                {% else %}
+	               {{ author.authorName }}
+                {% endif %}
+			{% endfor %}
+		</p>
+		<p class="card-text text-center"> ISBN10 : {{ book.isbn10 }} </p>
+		<p class="card-text text-center"> ISBN13 : {{ book.isbn13 }} </p>
+		<p class="card-text text-center"> Nombre de pages : {{ book.pagecount }} </p>
+		<p class="card-text text-center">Date de publication : {{ book.publishedAt|date('d/m/Y') }}</p>
+		<p class="card-text text-center">Editeur : {{ book.editor }}</p>
+	</div>
+	<div class="card my-5 px-3 pt-3">
+		<h2>Description</h2>
+		<div class="card-body">
+			<p>{{ book.description}}</p>
+		</div>
+	</div>
+    <div class="card mb-5 px-3 pt-3">
+        <h2>Note moyenne ({{ book.notes|length }} avis)</h2>
+        {% set sumratings = 0 %}
+        {% for note in book.notes %}
+            {% set sumratings = sumratings + note.note %}
+        {% endfor %}
+        <div class="card-body">
+            {% if book.notes|length > 0 %}
+                <p> {{ sumratings / book.notes|length }} / 5</p>
+                <hr>
+            {% endif %}
+            {% set noted = false %}
+            {% for note in app.user.notes %}
+                {% if note.user == app.user and note.book == book %}
+                    <p class="font-italic">Vous avez déjà noté ce livre ;)</p>
+                    {% set noted = true %}
+                {% endif %}
+            {% endfor %}
+            {% if not noted %}
+                <form action="{{ path('book_note', {'id': book.id}) }}" method="POST">
+                    <div class="form-group">
+                        <label for="note">Votre note (sur 5) : </label>
+                        <select class="form-control" id="note" name="given-note">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <input class="btn btn-secondary" type="submit" name="add-note" value="Noter !">
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+	<div class="card mb-5 px-3 pt-3">
+		<h2>Commentaires</h2>
+        {% if book.comments|length > 0 %}
+            <div class="card-body">
+                {% for comment in book.comments %}
+                    <p>{{comment.text}}</p>
+                    <p class="font-italic">Par {{comment.user}}, le {{ comment.publishedAt|date('d/m/Y') }}</p>
+                    <hr>
+                {% endfor %}
+            </div>
+        {% endif %}
+	</div>
+    <div class="card mb-5 px-3 pt-3">
+		<h2 >Poster un commentaire :</h2>
+        {{ form_start(form, {'action': path('book_view', {'id': book.id}), 'method': 'POST'}) }}
+			<div class="form-group">
+                {{ form_label(form.text, null, {'label': 'Votre commentaire', 'label_attr': {'class': 'field field-label js-hide-label'}}) }}
+            	{{ form_errors(form.text)}}
+                {{ form_widget(form.text, {'attr': {'class': 'field field-input', 'placeholder': 'Votre commentaire'}}) }}
+            	{{ form_widget(form._token) }}
+			</div>
+            <div class="d-flex justify-content-center">
+                <button type="submit" class="btn btn-secondary mb-2">Poster</button>
+            </div>
+        {{ form_end(form, {'render_rest': false}) }}
+	</div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('public/js/forms/forms.js') }}"></script>
+{% endblock %}

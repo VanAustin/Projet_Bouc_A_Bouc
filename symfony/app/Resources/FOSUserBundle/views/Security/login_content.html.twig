@@ -1,0 +1,37 @@
+{% trans_default_domain 'FOSUserBundle' %}
+
+{% if error %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        {{ error.messageKey|trans(error.messageData, 'security') }}
+    </div>
+{% endif %}
+
+
+<form class="col-8 m-auto" action="{{ path("fos_user_security_check") }}" method="post">
+    {% if csrf_token %}
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+    {% endif %}
+
+    <div class="form-group">
+        <label class="field field-label js-hide-label" id="username-label" for="username">Nom d'utilisateur</label>
+        <input class="field field-input" type="text" id="username" name="_username" value="{{ last_username }}" required="required" placeholder="Nom d'utilisateur"/>
+    </div>
+
+    <div class="form-group">
+        <label class="field field-label js-hide-label" id="password-label" for="password">Mot de passe</label>
+        <input class="field field-input" type="password" id="password" name="_password" required="required" placeholder="Mot de passe"/>
+    </div>
+
+    <div class="d-flex justify-content-center align-items-center mt-5 mb-5">
+        <label class="custom-control custom-checkbox" id="remember_me-label" for="remember_me">
+            <input type="checkbox" class="custom-control-input" id="remember_me" name="_remember_me" value="on">
+            <span class="custom-control-indicator"></span>
+            <span class="custom-control-description dark">Se souvenir de moi</span>
+        </label>
+    </div>
+
+    <input class="field" type="submit" id="_submit" name="_submit" value="Se connecter" />
+</form>

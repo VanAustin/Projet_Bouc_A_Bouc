@@ -1,0 +1,7 @@
+upload:
+    resource: "@UploadBundle/Resources/config/routing.yml"
+    prefix:   /
+
+upload_homepage:
+    path:     /
+    defaults: { _controller: UploadBundle:Default:index }

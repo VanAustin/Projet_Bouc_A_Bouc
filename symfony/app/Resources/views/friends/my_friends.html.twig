@@ -1,0 +1,190 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ parent() }} - Mon cercle
+{% endblock %}
+
+{% block body %}
+    <h2>Mon cercle</h2>
+
+    <div class="switch-tabs">
+        <ul class="switch-tabs-nav clearfix">
+            <li><a id="local-cercle" href="#cercle">Mon cercle</a></li>
+            <li><a id="local-recherche" href="#recherche">Agrandir mon cercle</a></li>
+            <li><a id="local-demandes" href="#demandes">Mes demandes <span id="friend-notifs2" class="tab-span-notif badge badge-danger"></span></a></li>
+        </ul>
+
+        <div class="switch-tabs-body mb-50">
+
+            <div id="cercle" class="switch-content">
+                <div class="d-flex flex-wrap justify-content-around">
+                    {% for friend in friends %}
+                        {% if friend.accepted %}
+                            <div class="mx-2">
+                                <a class="card-link" href="{{ path('friend_show', {'id': friend.user.id}) }}">
+                                    <div class="card text-center mb-5 px-3" style="width: 20rem;">
+                                        {% if friend.user.filename is defined and friend.user.filename != null %}
+                                            <img class="card-img-top mx-auto avatar my-2" src="{{ asset('uploads/' ~friend.user.filename) }}" alt="">
+                                        {% else %}
+                                            <img class="card-img-top mx-auto avatar my-2" src="{{ asset('public/images/goat.jpg') }}" alt="" class="avatar">
+                                        {% endif %}
+                                        <div class="card-body">
+                                            <h4 class="card-title">{{ friend.user.username }}</h4>
+                                            <p class="card-text">{{ friend.user.address }}</p>
+                                        </div>
+                                        <hr class="m-0">
+                                        <div class="m-2">
+                                            <a class="btn btn-danger" href="{{ path('delete_friend', {'id': friend.user.id}) }}" onclick="return confirm('Supprimer ?')"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</a>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div id="recherche" class="switch-content">
+                <div class="col-8 m-auto">
+                    <div class="form-group">
+                        <form>
+                            <label for="" class="field field-label js-hide-label">Pseudo de la personne recherchée</label>
+                            <input type="text" name="search" value="{{ search }}" class="field field-input" placeholder="Pseudo de la personne recherchée">
+                            <input type="submit" id="_submit" value="Rechercher">
+                        </form>
+                    </div>
+                </div>
+
+                {% if searchFriends %}
+                    <table class="table table-striped mb-5 table-responsive">
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>Utilisateur</th>
+                                <th>Avatar</th>
+                                <th>Adresse</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <div id="map"></div>
+                            <style>
+                                #map
+                                {
+                                  height: 400px;
+                                  width: 100%;
+                                }
+                            </style>
+
+                            {% set geolocId = 0 %}
+
+                            {% for person in searchFriends %}
+
+                            {% set geolocId = geolocId + 1 %}
+                            <p id="lat{{ geolocId }}" style="display: none;">{{ person.lat }}</p>
+                            <p id="lng{{ geolocId }}" style="display: none;">{{ person.lng }}</p>
+                            <tr>
+                                {% set break = false %}
+                                {% if not break and person == app.user %}
+                                    <td>C'est moi <i class="fa fa-hand-peace-o" aria-hidden="true"></i></td>
+                                    {% set break = true %}
+                                {% endif %}
+                                {% for friend in friends %}
+                                    {% if not break and person == friend.user %}
+                                        {% if friend.accepted %}
+                                            <td>Déjà dans mon cercle <i class="fa fa-check" aria-hidden="true"></i></td>
+                                            {% set break = true %}
+                                        {% else %}
+                                            <td>Demande reçue <i class="fa fa-exclamation-circle" aria-hidden="true"></i></td>
+                                            {% set break = true %}
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% for request in friendRequests %}
+                                    {% if not break and person == request.hasFriend %}
+                                        <td>Demande envoyée <i class="fa fa-paper-plane" aria-hidden="true"></i></td>
+                                        {% set break = true %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% if not break %}
+                                    <td>
+                                        <form class="" action="{{ path('friend_request', {'id': person.id}) }}" method="post">
+                                            <input type="submit" class="btn btn-secondary" value="Inviter">
+                                        </form>
+                                    </td>
+                                {% endif %}
+                                <td id="username{{ geolocId }}">{{ person.username }}</td>
+                                <td>
+                                    {% if person.file %}
+                                        <img src="{{ asset(person.file.pathname) }}" alt="" class="img-fluid" width="100">
+                                    {% else %}
+                                        <img src="{{ asset('public/images/goat.jpg') }}" alt="" class="avatar" width="50">
+                                    {% endif %}
+                                </td>
+                                <td>{{ person.address }}</td>
+                            </tr>
+                        {% endfor %}
+                        <p id="geoloc-count" style="display: none;">{{ geolocId }}</p>
+
+                        </tbody>
+                    </table>
+
+                {% elseif searchFriends == null and search %}
+                    <div class="alert-warning center d-flex justify-content-center" role="alert">
+                        <span>Aucun résultat trouvé <i class="fa fa-frown-o" aria-hidden="true"></i></span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div id="demandes" class="switch-content">
+                <div class="row no-gutters">
+                    <div class="col-lg-6 mb-5">
+                        <h2>Demandes reçues</h2>
+                        {% set count = 0 %}
+                        {% for friend in friends %}
+                            <ul class="list-group px-3">
+                                {% if not friend.accepted %}
+                                    <li class="list-group-item list-group-item-warning d-flex justify-content-between">
+                                        <span class="align-self-center">'{{ friend.user.username }}' veut vous ajouter à son cercle</span>
+                                        <form class="align-self-center" action="{{ path('friend_accept', {'id': friend.user.id}) }}" method="post">
+                                            <input type="submit" class="btn btn-secondary" value="Accepter">
+                                        </form>
+                                    </li>
+                                    {% set count = count + 1 %}
+                                {% endif %}
+                            </ul>
+                        {% endfor %}
+                        {% if count == 0 %}
+                            <ul class="list-group px-3">
+                                <li class="list-group-item list-group-item-secondary">Aucune demande en cours</li>
+                            </ul>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-lg-6 mb-5">
+                        <h2>Demandes envoyées (en attente)</h2>
+                        {% if friendRequests %}
+                            {% for request in friendRequests %}
+                                <ul class="list-group px-3">
+                                    <li class="list-group-item list-group-item-warning">Demande à '{{ request.hasFriend.username }}' de rejoindre votre cercle</li>
+                                </ul>
+                            {% endfor %}
+                        {% else %}
+                            <ul class="list-group px-3">
+                                <li class="list-group-item list-group-item-secondary">Aucune demande en cours</li>
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('public/js/tabs/cercle-tabs.js') }}"></script>
+    <script src="{{ asset('public/js/forms/forms.js') }}"></script>
+    <script src="{{ asset('public/js/geoloc/geoloc.js') }}"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDrNUg-OB0yrh3jDuC4n7nXBDhDbFkmpvY&callback=initMap"></script>
+{% endblock %}

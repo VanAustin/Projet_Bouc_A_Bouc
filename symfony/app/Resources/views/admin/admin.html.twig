@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ parent() }} - Admin
+{% endblock %}
+
+{% block body %}
+
+    <h2>Bienvenue sur l'admin de Bouc A Bouc !</h2>
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <div class="d-flex flex-wrap justify-content-around">
+            <div class="card mb-5 px-3 pt-3">
+                <div class="card-body">
+                    <a class="btn btn-secondary" href="{{ path('admin_users') }}">Administrer les utilisateurs<br><i class="fa fa-users mt-2" aria-hidden="true"></i></a>
+                </div>
+            </div>
+            <div class="card mb-5 px-3 pt-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-center">
+                        <a class="btn btn-secondary" href="{{ path('admin_categories') }}">Administrer les catégories<br><i class="fa fa-tags mt-2" aria-hidden="true"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+{% endblock %}

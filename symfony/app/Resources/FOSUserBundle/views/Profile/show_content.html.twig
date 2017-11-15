@@ -1,0 +1,50 @@
+{% trans_default_domain 'FOSUserBundle' %}
+
+<div class="container-fluid">
+	<div class="row no-gutters">
+		<div class="col">
+			<div class="fos_user_user_show mt-5">
+				<a class="edit-profil" href="{{ path('fos_user_profile_edit') }}">
+          <h2>Mes informations <i class="fa fa-pencil-square-o" aria-hidden="true"></i></h2>
+        </a>
+				<table class="table table-responsive">
+					<tr>
+             <div class="d-flex justify-content-center">
+                 {% if app.user.file.pathname is defined %}
+                     <img src="{{ asset(app.user.file.pathname) }}" alt="" class="avatar my-2">
+                  {% else %}
+                      <img src="{{ asset('public/images/goat.jpg') }}" alt="" class="avatar my-2">
+                   {% endif %}
+               </div>
+					</tr>
+					<tr class="info">
+						<th>{{ 'Nom d\'utilisateur'|trans }}</th>
+						<th> {{ user.username }} </th>
+					</tr>
+					<tr>
+						<th>{{ 'profile.show.email'|trans }}</th>
+						<th>{{ user.email }}</th>
+					</tr>
+					<tr>
+						<th>{{ 'Adresse'|trans }}</th>
+						<th>{{ user.address }}</th>
+					</tr>
+				</table>
+				
+        <div id="map"></div>
+				
+				<style>
+		        #map
+		        {
+		          height: 275px;
+		          width: 100%;
+		        }
+		    </style>
+		    <p id="lat1" style="display: none;">{{ app.user.lat }}</p>
+		    <p id="lng1" style="display: none;">{{ app.user.lng }}</p>
+		    <p id="geoloc-count" style="display: none;">1</p>
+				
+			</div>
+		</div>
+	</div>
+</div>

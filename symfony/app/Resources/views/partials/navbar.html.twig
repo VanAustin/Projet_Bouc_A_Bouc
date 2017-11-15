@@ -1,0 +1,85 @@
+<nav class="navbar navbar-dark bg-dark navbar-expand-lg">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#nav">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <span id="burger-notifs" class="badge badge-danger"></span>
+    <p id="navbar-welcome">Bienvenue {% if app.user %}{{ app.user.username }}{% endif %} !!!</p>
+
+    <div class="collapse navbar-collapse fixed-top" id="nav">
+        <div id="links">
+            {% if is_granted('ROLE_USER') %}
+                <div class="d-flex justify-content-center">
+                    <a class="nav-item mb-4" href="{{ path('fos_user_profile_show') }}">
+                        <div class="d-flex flex-column">
+                            {% if app.user.file.pathname is defined %}
+                                <img src="{{ asset(app.user.file.pathname) }}" alt="" class="avatar">
+                            {% else %}
+                                <img src="{{ asset('public/images/goat.jpg') }}" alt="" class="avatar">
+                            {% endif %}
+                            <span class="nav-item-text text-center mt-3">{{ app.user.username }}</span>
+                        </div>
+                    </a>
+                </div>
+                <a class="nav-item" href="{{ path('my_collection', {'id': app.user.id}) }}">
+                    <i class="fa fa-book" aria-hidden="true"></i> <span class="nav-item-text">Ma collection</span>
+                </a>
+                <br>
+                <a class="nav-item" href="{{ path('my_wishlist', {'id': app.user.id}) }}">
+                    <i class="fa fa-heart" aria-hidden="true"></i> <span class="nav-item-text">Mes souhaits</span>
+                </a>
+                <br>
+                <a class="nav-item" href="{{ path('my_friends', {'id': app.user.id}) }}">
+                    <i class="fa fa-users" aria-hidden="true"></i> <span class="nav-item-text">Mon cercle </span><span id="friend-notifs" class="nav-item-text badge badge-danger"></span>
+                </a>
+                <br>
+                <a class="nav-item" href="{{ path('loan_management') }}">
+                    <i class="fa fa-exchange" aria-hidden="true"></i> <span class="nav-item-text">Mes prêts </span><span id="loan-notifs" class="nav-item-text badge badge-danger"></span>
+                </a>
+                <br>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a class="nav-item" href="{{ path('admin') }}">
+                        <i class="fa fa-user-secret" aria-hidden="true"></i> <span class="nav-item-text">Admin</span>
+                    </a>
+                    <br>
+                {% endif %}
+                <a class="nav-item" href="{{ path('fos_user_security_logout') }}">
+                    <i class="fa fa-sign-out" aria-hidden="true"></i> <span class="nav-item-text">Déconnexion</span>
+                </a>
+                <br>
+            {% else %}
+                <a class="nav-item" href="{{ path('fos_user_security_login') }}">
+                    <i class="fa fa-user" aria-hidden="true"></i> <span class="nav-item-text">Connexion</span>
+                </a>
+                <br>
+                <a class="nav-item" href="{{ path('fos_user_registration_register') }}">
+                    <i class="fa fa-user-plus" aria-hidden="true"></i> <span class="nav-item-text">Inscription</span>
+                </a>
+                <br>
+            {% endif %}
+        </div>
+        <div id="footer-fixed">
+            <div id="footer-social">
+                <a href="#">
+                    <i class="fa fa-facebook" aria-hidden="true"></i>
+                </a>
+                <a href="#">
+                    <i class="fa fa-twitter" aria-hidden="true"></i>
+                </a>
+                <a href="#">
+                    <i class="fa fa-instagram" aria-hidden="true"></i>
+                </a>
+                <a href="#">
+                    <i class="fa fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </div>
+            <div id="footer-links">
+                <a href="#">Plan du site</a>
+                <a href="#">Contact</a>
+                <a href="#">Mentions légales</a>
+            </div>
+            <p id="footer-copyright">
+                Bouc à Bouc &copy; - {{ "now"|date("Y") }}
+            </p>
+        </div>
+    </div>
+</nav>

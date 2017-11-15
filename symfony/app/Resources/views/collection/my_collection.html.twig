@@ -1,0 +1,86 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ parent() }} - Ma collection
+{% endblock %}
+
+{% block body %}
+    <h2>Ma collection de livres</h2>
+
+    <div class="switch-tabs">
+        <ul class="switch-tabs-nav clearfix">
+            <li><a class="filter-choice" id="all" href="#">Toutes categs</a></li>
+            <li><a class="filter-choice" id="no-categ" href="#">Pas encore rangé(s)</a></li>
+            {% for categ in categs %}
+                <li><a class="filter-choice" id="{{ categ.categoryName }}" href="#">{{ categ.categoryName }}</a></li>
+            {% endfor %}
+        </ul>
+
+        <div class="switch-tabs-body mb-50">
+            <div class="switch-content">
+                <div class="d-flex flex-wrap justify-content-center">
+                    {% for book in collection %}
+                        <div class="mx-2 all {{ book.category ? book.category.categoryName : 'no-categ' }}">
+                            <div class="card text-center mb-5 px-3 pt-3">
+                                <a class="card-link" href="{{ path('book_view', {'id': book.book.id}) }}">
+                                    <img class="card-img-top" src="{{ book.book.picture }}" alt="" style="width: fit-content; margin: auto;">
+                                    <div class="card-body">
+                                        <h4 class="card-title">{{ book.book.title }}</h4>
+                                        <p class="card-text">
+                                            Auteur(s) :
+                                            {% for author in book.book.authors %}
+                                                {% if not loop.last %}
+                                                    {{ author.authorName }},
+                                                {% else %}
+                                                    {{ author.authorName }}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </p>
+                                        <p class="card-text">Ma catégorie : <span class="badge badge-warning">{{ book.category ? book.category.categoryName : 'Pas encore rangé ;)' }}</span></p>
+                                    </div>
+                                </a>
+                                <hr class="m-0">
+                                <form action="{{ path('change_categ', {'id': book.id}) }}" method="post">
+                                    <div class="d-flex flex-wrap justify-content-center mt-2">
+                                        <label class="font-italic" for="categ">Vous pouvez ranger votre livre dans une catégorie :</label>
+                                    </div>
+                                    <div class="d-flex justify-content-around">
+                                        <select class="form-control" name="categ" id="categ">
+                                            <option value="" {% if book.category == null %} selected {% endif %}>Aucune</option>
+                                            {% for categ in categs %}
+                                                <option value="{{ categ.id }}" {% if book.category and book.category.categoryName == categ.categoryName %} selected {% endif %}>{{ categ.categoryName }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <input class="btn btn-secondary mb-2" type="submit" name="change-categ" value="Go !">
+                                    </div>
+                                </form>
+                                {% if not book.loanable %}
+                                    <div class="m-2">
+                                        <form action="{{ path('loanable_book', {'id': book.id}) }}" method="POST">
+                                            <button type="submit" name="loanable" class="btn btn-light"><i class="fa fa-check" aria-hidden="true"></i> Autoriser au prêt</button>
+                                        </form>
+                                    </div>
+                                {% elseif book.loanable %}
+                                    <div class="m-2">
+                                        <form action="{{ path('loanable_book', {'id': book.id}) }}" method="POST">
+                                            <button type="submit" name="notloanable" class="btn btn-secondary"><i class="fa fa-ban" aria-hidden="true"></i> Retirer du prêt</button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+                                <div class="m-2">
+                                    <a class="btn btn-danger" href="{{ path('delete_book', {'id': book.id}) }}" onclick="return confirm('Supprimer ?')"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('public/js/categ-filter/categ-filter.js') }}"></script>
+{% endblock %}

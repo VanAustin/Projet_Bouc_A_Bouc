@@ -1,0 +1,17 @@
+services:
+  upload.annotation_reader:
+    class: VanTouch\UploadBundle\Annotation\UploadAnnotationReader
+    arguments: ["@annotations.reader"]
+
+  upload.handler:
+    class: VanTouch\UploadBundle\Handler\UploadHandler
+
+  upload.subscriber:
+    class: VanTouch\UploadBundle\Listener\UploadSubscriber
+    arguments: ["@upload.annotation_reader", "@upload.handler"]
+    tags:
+      - { name: doctrine.event_subscriber, connection: default }
+      
+#    upload.example:
+#        class: VanTouch\UploadBundle\Example
+#        arguments: ["@service_id", "plain_value", "%parameter%"]

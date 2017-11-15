@@ -1,0 +1,16 @@
+{% extends "@FOSUser/layout.html.twig" %}
+
+{% block title %}
+    {{ parent() }} - Inscription
+{% endblock %}
+
+{% block fos_user_content %}
+{% include "@FOSUser/Registration/register_content.html.twig" %}
+{% endblock fos_user_content %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDrNUg-OB0yrh3jDuC4n7nXBDhDbFkmpvY&libraries=places"></script>
+    <script src="{{ asset('public/js/geocomplete/jquery.geocomplete.js') }}"></script>
+    <script src="{{ asset('public/js/geocomplete/geocomplete.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,194 @@
+input[type=submit],
+button[type=submit] {
+    cursor:pointer;
+}
+
+#burger-notifs {
+  position: absolute;
+  left: 70px;
+  top: 5px;
+  font-size: 1em;
+}
+
+#nav {
+  overflow-y: scroll;
+}
+
+#footer-fixed {
+  background-color: #727B84;
+  width: 100%;
+  text-align: center;
+  padding: 0.5em 0;
+  font-family: sans-serif;
+}
+
+#links {
+  margin-bottom: 10%;
+}
+
+@media (min-width: 992px) {
+  .navbar-expand-lg .navbar-collapse {
+    display: block !important;
+  }
+}
+
+.crime-container {
+  height: 130px;
+  background: url("../images/crime-scene.jpg") 0 0 no-repeat;
+}
+
+.crime {
+  background-position: -28px -338px;
+}
+
+.react-margin {
+  margin-top: 40em;
+}
+
+.avatar
+{
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.card-link,
+.card-link:hover {
+  color: #212529;
+}
+
+.book-link,
+.book-link:hover {
+  color: #856404;
+}
+
+.tab-span-notif {
+  float: right;
+  margin-left: 1em;
+}
+
+.book-link:hover {
+  text-decoration: underline;
+}
+
+
+/* for tabs in user show */
+.clearfix:before,
+.clearfix:after {
+  content: '';
+  display: table;
+}
+
+.clearfix:after {
+  clear: both;
+}
+
+.mb-50 {
+  margin-bottom: 50px !important;
+}
+
+ul.switch-tabs-nav {
+  position: relative;
+  margin: 0;
+  list-style: none;
+  padding-left: 0;
+  border-bottom: 1px solid #ddd;
+}
+
+ul.switch-tabs-nav li {
+  float: left;
+  line-height: 1em;
+  margin-bottom: -1px;
+  background-color: #b98b6a;
+  border-right: 1px solid #ddd;
+  border-top: 1px solid #ddd;
+}
+
+ul.switch-tabs-nav li a {
+  display: block;
+  padding: 18px 30px;
+  color: #eee;
+  font-family: "Source Sans Pro";
+  text-transform: uppercase;
+  font-size: 1em;
+}
+
+ul.switch-tabs-nav li.active a {
+  color: #444;
+}
+
+ul.switch-tabs-nav li a:hover,
+ul.switch-tabs-nav li a:focus {
+  color: #444;
+}
+
+ul.switch-tabs-nav li:first-child {
+  border-left: 1px solid #ddd;
+}
+
+ul.switch-tabs-nav li:hover,
+ul.switch-tabs-nav li:focus {
+  background-color: #fff;
+}
+
+ul.switch-tabs-nav li.active {
+  background-color: #fff;
+  border-top: 2px solid #b98b6a;
+}
+
+ul.switch-tabs-nav.switch-tabs-white li {
+  background-color: #fff;
+}
+
+ul.switch-tabs-nav.switch-tabs-white li:hover,
+ul.switch-tabs-nav.switch-tabs-white li:focus {
+  background-color: #f6f6f6;
+}
+
+ul.switch-tabs-nav.switch-tabs-borderless {
+  border-bottom: 0;
+}
+
+ul.switch-tabs-nav.switch-tabs-borderless li {
+  border-bottom: 1px solid #ddd;
+}
+
+ul.switch-tabs-nav.switch-tabs-borderless li.active {
+  border-bottom: 1px solid transparent;
+}
+
+ul.switch-tabs-nav.rtl li {
+  float: right;
+  border-right: 0;
+  border-left: 1px solid #ddd;
+}
+
+ul.switch-tabs-nav.rtl li:first-child {
+  border-right: 1px solid #ddd;
+}
+
+ul.switch-tabs-nav.rtl.responsive li {
+  border-right: 1px solid #ddd;
+}
+
+ul.switch-tabs-nav.responsive li {
+  float: none;
+  display: block;
+  border-left: 1px solid #ddd;
+}
+
+.switch-tabs-body {
+  position: relative;
+  padding: 30px 40px 20px 40px;
+  border: 1px solid #ddd;
+  border-top: 1px solid transparent;
+}
+
+.switch-tabs-body .switch-content {
+  position: relative;
+}
+
+.switch-tabs-body.borderless {
+  border: 0;
+}

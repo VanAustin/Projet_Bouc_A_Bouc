@@ -1,0 +1,313 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ parent() }} - Accueil
+{% endblock %}
+
+{% block body %}
+    {% if is_granted('ROLE_USER') %}
+        <h2>Rechercher un livre</h2>
+        <!-- Formulaire pour la recherche du livre -->
+        <div class="col-8 m-auto">
+            <div class="form-group">
+                <form>
+                    <div class="d-flex flex-wrap justify-content-center">
+                        <label class="custom-control custom-radio mb-2" id="remember_me-label">
+                          <input type="radio" class="custom-control-input" name="search-choice" value="global" id="global-search" {{ choice == null or choice == 'global' ? 'checked' : '' }}>
+                          <span class="custom-control-indicator"></span>
+                          <span class="custom-control-description dark">Sur internet</span>
+                        </label>
+                        <label class="custom-control custom-radio mb-2" id="remember_me-label">
+                            <input type="radio" class="custom-control-input" name="search-choice" value="collection" id="collection-search" {{ choice == 'collection' ? 'checked' : '' }}>
+                            <span class="custom-control-indicator"></span>
+                            <span class="custom-control-description dark">Dans ma collection</span>
+                        </label>
+                        <label class="custom-control custom-radio mb-2" id="remember_me-label">
+                            <input type="radio" class="custom-control-input" name="search-choice" value="wishlist" id="collection-search" {{ choice == 'wishlist' ? 'checked' : '' }}>
+                            <span class="custom-control-indicator"></span>
+                            <span class="custom-control-description dark">Dans ma liste de souhaits</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="field field-label js-hide-label">Rechercher un livre par titre ou ISBN (10 ou 13 chiffres)</label>
+                        <input class="field field-input" type="text" name="search" placeholder="Rechercher un livre par titre ou ISBN (10 ou 13 chiffres)" value="{{ search ? search : '' }}">
+                        <div class="d-flex justify-content-center align-items-center mb-5">
+                            <label class="custom-control custom-checkbox" id="remember_me-label" for="author">
+                                <input type="checkbox" class="custom-control-input" id="author" name="author" value="author" {{ byAuthor ? 'checked' : '' }}>
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description dark">Cocher pour rechercher par auteur</span>
+                            </label>
+                        </div>
+                    </div>
+                    <input id="_submit" type="submit" name="search-button" value="Go !">
+                </form>
+            </div>
+        </div>
+
+        {% if message != null %}
+            <div class="alert-warning center d-flex justify-content-center" role="alert">
+                <span><i class="fa fa-exclamation-circle" aria-hidden="true"></i> {{ message }}</span>
+            </div>
+        {% endif %}
+
+        <!-- Pour afficher les books de la collection d'un user après recherche -->
+        {% if not response %}
+            <div class="d-flex flex-wrap justify-content-center" style="padding: 0 40px;">
+                {% for book in collectionBooks %}
+                    <div class="mx-2">
+                        <a class="card-link" href="{{ path('book_view', {'id': book.id}) }}">
+                            <div class="card text-center mb-5 px-3 pt-3">
+                                <img class="card-img-top" src="{{ book.picture }}" alt="" style="width: fit-content; margin: auto;">
+                                <div class="card-body">
+                                    <h4 class="card-title">{{ book.title }}</h4>
+                                    <p class="card-text">
+                                        Auteur(s) :
+                                        {% for author in book.authors %}
+                                            {% if not loop.last %}
+                                                {{ author.authorName }},
+                                            {% else %}
+                                                {{ author.authorName }}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </p>
+                                    {% for collection in book.collections %}
+                                        {% if collection.category != null %}
+                                            <p class="card-text">Ma catégorie : <span class="badge badge-warning">{{ collection.category.categoryName }}</span></p>
+                                        {% else %}
+                                            <p class="card-text">Ma catégorie : <span class="badge badge-warning">Pas encore rangé ;)</span></p>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <p class="card-text">ISBN10 : {{ book.isbn10 }}</p>
+                                    <p class="card-text">ISBN13 : {{ book.isbn13 }}</p>
+                                </div>
+                                <hr class="m-0">
+                                <div class="m-2">
+                                    {% for book in book.collections %}
+                                        {% if book.user.id == app.user.id %}
+                                            <a class="btn btn-danger" href="{{ path('delete_book', {'id': book.id}) }}"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</a>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Pour afficher les books de la liste de souhaits d'un user après recherche -->
+        {% if not response and not collectionBooks %}
+            <div class="d-flex flex-wrap justify-content-around" style="padding: 0 40px;">
+                {% for book in wishBooks %}
+                    <div class="mx-2">
+                        <a class="card-link" href="{{ path('book_view', {'id': book.id}) }}">
+                            <div class="card text-center mb-5 px-3 pt-3">
+                                <img class="card-img-top" src="{{ book.picture }}" alt="" style="width: fit-content; margin: auto;">
+                                <div class="card-body">
+                                    <h4 class="card-title">{{ book.title }}</h4>
+                                    <p class="card-text">
+                                        Auteur(s) :
+                                        {% for author in book.authors %}
+                                            {% if not loop.last %}
+                                                {{ author.authorName }},
+                                            {% else %}
+                                                {{ author.authorName }}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </p>
+                                    <p class="card-text">ISBN10 : {{ book.isbn10 }}</p>
+                                    <p class="card-text">ISBN13 : {{ book.isbn13 }}</p>
+                                </div>
+                                <hr class="m-0">
+                                <div class="m-2">
+                                    <a class="btn btn-secondary" href="{{ path('wish_to_collection', {'id': book.id}) }}"><i class="fa fa-exchange" aria-hidden="true"></i> Passer dans ma collection</a>
+                                </div>
+                                <div class="m-2">
+                                    <a class="btn btn-danger" href="{{ path('delete_bookwishes', {'id': book.id}) }}"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</a>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Pour afficher les books de google books après recherche -->
+        {% if response and response.items is defined %}
+            <div class="d-flex flex-wrap justify-content-center" style="padding: 0 40px;">
+                {% for book in response.items %}
+                    {% if book.volumeInfo.industryIdentifiers is defined and 1 in book.volumeInfo.industryIdentifiers|keys %}
+                        <div class="mx-2">
+                            <div class="card mb-5 px-3 pt-3">
+                                {% if book.volumeInfo.imageLinks is defined %}
+                                    <img class="card-img-top" src="{{ book.volumeInfo.imageLinks.thumbnail }}" alt="" style="width: fit-content; margin: auto;">
+                                {% endif %}
+                                <div class="card-body">
+                                    {% set break = false %}
+                                    {% for bookCollection in collectionBooks if not break %}
+                                        {% if bookCollection.book.title == book.volumeInfo.title %}
+                                            <div class="d-flex justify-content-center">
+                                                <span class="badge badge-warning mb-3"><i class="fa fa-book" aria-hidden="true"></i> Déjà dans ma bibliothèque</span>
+                                                {% set break = true %}
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% for bookWish in wishBooks if not break %}
+                                        {% if bookWish.title == book.volumeInfo.title %}
+                                            <div class="d-flex justify-content-center">
+                                                <span class="badge badge-warning mb-3"><i class="fa fa-heart" aria-hidden="true"></i> Déjà dans ma liste de souhaits</span>
+                                                {% set break = true %}
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if not break %}
+                                        <div class="text-center">
+                                            <form action="{{ path('add_book', {'book': book.volumeInfo}) }}" method="post">
+                                                <select class="form-control" name="categ">
+                                                    <option value="" selected disabled>Vous pouvez ranger votre livre dans une catégorie</option>
+                                                    <option value="">Aucune</option>
+                                                    {% for categ in categs %}
+                                                        <option value="{{ categ.id }}">{{ categ.categoryName }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <button name="collection" class="btn btn-secondary mb-3" type="submit" action=""><i class="fa fa-book" aria-hidden="true"></i> Ajouter à ma bibliothèque</button>
+                                            </form>
+                                        </div>
+                                        <div class="d-flex justify-content-center">
+                                            <form class="" action="{{ path('add_book', {'book': book.volumeInfo}) }}" method="post">
+                                                <button name="wishlist" class="btn btn-secondary mb-3" type="submit" action=""><i class="fa fa-heart" aria-hidden="true"></i> Ajouter à ma liste de souhaits</button>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                    <h4 class="card-title">{{ book.volumeInfo.title }}</h4>
+                                    <p class="card-text">
+                                        Auteur(s) :
+                                        {% if book.volumeInfo.authors is defined %}
+                                            {% for author in book.volumeInfo.authors %}
+                                                {% if not loop.last %}
+                                                    {{ author }},
+                                                {% else %}
+                                                    {{ author }}
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </p>
+                                    {% for isbn in book.volumeInfo.industryIdentifiers %}
+                                        <p class="card-text">{{ isbn.type|replace({'_': ''}) }} : {{ isbn.identifier }}</p>
+                                    {% endfor %}
+                                    <div class="text-center">
+                                        <button class="btn btn-light" type="button" data-toggle="collapse" data-target="#collapseExample{{ book.volumeInfo.industryIdentifiers[0].identifier }}" aria-expanded="false" aria-controls="collapseExample{{ book.volumeInfo.industryIdentifiers[0].identifier }}">
+                                            <i class="fa fa-info-circle" aria-hidden="true"></i> Plus d'infos
+                                        </button>
+                                        <div class="collapse" id="collapseExample{{ book.volumeInfo.industryIdentifiers[0].identifier }}">
+                                            <div class="d-flex justify-content-center">
+                                                <div class="card card-body" style="width: 18em;">
+                                                    <p class="card-text">
+                                                        Nombre de pages :
+                                                        {% if book.volumeInfo.pageCount is defined %}
+                                                            {{ book.volumeInfo.pageCount }}
+                                                        {% endif %}
+                                                    </p>
+                                                    <p class="card-text">
+                                                        Publié le :
+                                                        {% if book.volumeInfo.publishedDate is defined %}
+                                                            {% if book.volumeInfo.publishedDate|length == 4 %}
+                                                                {{ book.volumeInfo.publishedDate }}
+                                                            {% elseif book.volumeInfo.publishedDate|length == 7 %}
+                                                                {{ book.volumeInfo.publishedDate|date('01/m/Y') }}
+                                                            {% else %}
+                                                                {{ book.volumeInfo.publishedDate|date('d/m/Y') }}
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </p>
+                                                    <p class="card-text">
+                                                        Editeur :
+                                                        {% if book.volumeInfo.publisher is defined %}
+                                                            {{ book.volumeInfo.publisher }}
+                                                        {% endif %}
+                                                    </p>
+                                                    <p class="card-text">
+                                                        Description :
+                                                        {% if book.volumeInfo.description is defined %}
+                                                            {{ book.volumeInfo.description }}
+                                                        {% endif %}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Div pour afficher les résulats gbooks via JS -->
+        <!-- <div id="content"></div> -->
+
+        <!-- Test call ajax back -->
+        <!-- <button id="ajax" type="button" name="button">Call ajax</button> -->
+
+        <!-- Test create en call ajax -->
+        <!-- <button id="ajax-create" type="button" name="button">Create a book ajax</button> -->
+
+        <!-- Test React -->
+        <hr class="react-margin">
+        <div class="crime-container crime"></div>
+        <div class="d-flex justify-content-center">
+            <p class="btn btn-warning">-- REACT -> IN PROGRESS --</p>
+        </div>
+        <div id="root"></div>
+
+    {% else %}
+        <div id="home" class="row no-gutters">
+            <div class="col-lg-6 pr-lg-4">
+                <h2> Qu'est ce que c'est ?</h2>
+                <div>
+                    Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</div>
+                <div>
+                    <img
+                        class="img-fluid mx-auto d-block"
+                        alt="club de lecture"
+                        src="{{ asset('public/images/lecteur-home.jpg') }}"
+                    />
+                    <div>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <h2>Consultable directement sur votre mobile...</h2>
+                <div class="row no-gutters">
+                    <div class="col-4 p-2">
+                        <img alt="exemple accueil sur mobile" src="{{ asset('public/images/mobile-accueil-connecté.png') }}" class="img-fluid" />
+                    </div>
+                    <div class="col-4 p-2">
+                        <img alt="autres exemple login sur mobile" src="{{ asset('public/images/mobile-login.png') }}" class="img-fluid" />
+                    </div>
+                    <div class="col-4 p-2">
+                        <img alt="exemple d'affichage du profil sur mobile" src="{{ asset('public/images/mobile-profil.png') }}" class="img-fluid" />
+                    </div>
+                </div>
+                <div>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                </div>
+                <div>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('public/js/forms/forms.js') }}"></script>
+    <script src="{{ asset('public/js/tests-ajax-back/test-ajax.js') }}"></script>
+    {% if is_granted('ROLE_USER') %}
+        <script src="{{ asset('public/js/react/app.js') }}"></script>
+        <script>require('src/search');</script>
+    {% endif %}
+{% endblock %}

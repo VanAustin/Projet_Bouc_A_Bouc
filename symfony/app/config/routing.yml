@@ -1,0 +1,8 @@
+# Génère toutes les routes fournies par FOSUserBundle (login/logout/register/...)
+fos_user:
+  resource: "@FOSUserBundle/Resources/config/routing/all.xml"
+fos_js_routing:
+    resource: "@FOSJsRoutingBundle/Resources/config/routing/routing.xml"
+app:
+    resource: '@AppBundle/Controller/'
+    type: annotation
